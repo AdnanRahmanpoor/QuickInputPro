@@ -17,6 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  window.openFile = () => {
+    ipcRenderer.send('file-request');
+  };
+
+  // Handle the reply from the main process
+  ipcRenderer.on('file', (event, filepath) => {
+    console.log('Selected File:', filepath);
+  });
   // Initial Tab
   switchTab('viewTab');
 
