@@ -1,14 +1,11 @@
 const { ipcRenderer } = require('electron');
 
-
-ipcRenderer.on('test-message', (event, message) => {
-  console.log('Received test message:', message);
-});
-
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Renderer process loaded.');
   const viewTab = document.getElementById('viewTab');
   const enterTab = document.getElementById('enterTab');
+  // Add an event listener for a button click in renderer.js
+
   // Switching between tabs
   window.switchTab = (tabname) => {
     if (tabname === 'viewTab') {
@@ -27,12 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Handle the reply from the main process
-  ipcRenderer.on('file', (event, filepath) => {
+  ipcRenderer.on('file', (e, filepath) => {
     console.log('Selected File:', filepath);
   });
 
   // Handle reply for fetching columns and creating form
   ipcRenderer.on('fetch-column', (e, columns) => {
+    fetchDataAndPopulateTable(); // causes loop error for now
     console.log('Received columns:', columns);
 
     createDataEntryForm(columns);
@@ -44,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch column names dynamically
     const columnInputs = document.querySelectorAll('.data-entry-input');
+
     columnInputs.forEach((input) => {
       const columnName = input.getAttribute('data-column');
       formData[columnName] = input.value;
@@ -79,8 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Fetching data & populate table
-  const fetchDataAndPopulateTable = () => {
-    ipcRenderer.send('fetch-data-request');
+  window.fetchDataAndPopulateTable = () => {
+    ipcRenderer.invoke('fetch-data-request');
   };
 
   // Initial Tab
