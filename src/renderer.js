@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Renderer process loaded.');
   const viewTab = document.getElementById('viewTab');
   const enterTab = document.getElementById('enterTab');
+
   // Add an event listener for a button click in renderer.js
 
   // Switching between tabs
@@ -26,14 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle the reply from the main process
   ipcRenderer.on('file', (e, filepath) => {
     console.log('Selected File:', filepath);
-  });
-
-  // Handle reply for fetching columns and creating form
-  ipcRenderer.on('fetch-column', (e, columns) => {
-    fetchDataAndPopulateTable(); // causes loop error for now
-    console.log('Received columns:', columns);
-
-    createDataEntryForm(columns);
   });
 
   // Form Submission
@@ -77,10 +70,64 @@ document.addEventListener('DOMContentLoaded', () => {
     enterTab.appendChild(form);
   };
 
+  let columnsFetched = false;
+
   // Fetching data & populate table
-  window.fetchDataAndPopulateTable = () => {
-    ipcRenderer.invoke('fetch-data-request');
+  window.fetchDataAndPopulateTable = async () => {
+    try {
+      if (!columnsFetched) {
+        await ipcRenderer.invoke('fetch-data-request');
+        columnsFetched = true;
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error.message);
+    }
   };
+
+  // Populate the data table
+  const populateDataTable = (columns, data) => {
+    const dataTable = document.getElementById('data-table');
+
+    // Create table headers
+    const headerRow = dataTable.querySelector('thead tr');
+    columns.forEach((column) => {
+      const headerCell = document.createElement('th');
+      headerCell.textContent = column;
+      headerRow.appendChild(headerCell);
+    });
+
+    // Create Table Row
+    const tbody = dataTable.querySelector('tbody');
+    console.log('Data:', data);
+    Object.keys(data).forEach((row) => {
+      // this line is showing the error
+      const rowElement = document.createElement('tr');
+
+      columns.forEach((column) => {
+        const cell = document.createElement('td');
+        cell.textContent = row[column];
+        rowElement.appendChild(cell);
+      });
+
+      tbody.appendChild(rowElement);
+    });
+  };
+
+  // Handle reply for fetching columns and creating form
+  ipcRenderer.on('fetch-column', (e, columns) => {
+    console.log('Received columns:', columns);
+    
+    if (!columnsFetched) {
+      fetchDataAndPopulateTable();
+    }
+  });
+  
+  ipcRenderer.on('fetch-data-response', (e, { columns, data }) => {
+    console.log('Received columns and data:', columns, data);
+    
+    createDataEntryForm(columns);
+    populateDataTable(columns, data);
+  });
 
   // Initial Tab
   switchTab('viewTab');

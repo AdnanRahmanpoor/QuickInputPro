@@ -44,6 +44,19 @@ function fetchColumnNames(tableName) {
   });
 }
 
+async function fetchData(tableName) {
+  try {
+    
+    const query = `SELECT * FROM ${tableName}`;
+    const data = await db.all(query);
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error.message);
+    throw error;
+  }
+}
+
 function getColumns() {
   return columns;
 }
@@ -55,6 +68,7 @@ function getTargetTableName() {
 module.exports = {
   connectToDatabase,
   fetchColumnNames,
+  fetchData,
   getColumns,
   getTargetTableName,
 };

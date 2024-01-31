@@ -5,6 +5,7 @@ const {
   fetchColumnNames,
   connectToDatabase,
   getColumns,
+  fetchData,
 } = require('./database');
 
 let mainWindow;
@@ -47,9 +48,10 @@ ipcMain.handle('fetch-data-request', async (e) => {
   try {
     await fetchColumnNames(targetTableName);
 
+    const data = await fetchData(targetTableName);
     // Emit 'fetch-column' event with the columns
     const columns = getColumns();
-    mainWindow.webContents.send('fetch-column', columns);
+    mainWindow.webContents.send('fetch-data-response', { columns, data });
     console.log('Fetched Columns:', columns);
   } catch (error) {
     console.error('Error fetching data:', error.message);
@@ -93,8 +95,8 @@ ipcMain.on('file-request', async (event) => {
         event.reply('fetch-column', fetchedColumns);
       } catch (error) {
         console.error('Error handling file request:', error.message);
-      }
-    }
+      
+      } }
   } catch (error) {
     console.log(error);
   }

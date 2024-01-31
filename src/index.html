@@ -12,12 +12,18 @@
     </div>
 
     <button onclick="openFile()">Open File</button>
-    <button id="fetchDataButton" onclick="fetchDataAndPopulateTable()">Fetch Data</button>
-
+    <button id="fetchDataButton" onclick="fetchDataAndPopulateTable()">
+      Fetch Data
+    </button>
 
     <div id="viewTab" class="tab">
       <h2>View Data</h2>
-      <div class="data-entry-input"></div>
+      <table id="data-table">
+        <thead>
+          <tr></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <div id="enterTab" class="tab">
